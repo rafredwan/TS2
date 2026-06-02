@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<!-- saved from url=(0058)file:///C:/Users/Raf%20Redwan/Downloads/ts2-prototype.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TS2 — Research Platform</title>
+<link href="./ts2-prototype_files/css2" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F3EF;
+  --surface:#FFFFFF;
+  --surface2:#F0EEE9;
+  --surface3:#E8E6E0;
+  --border:rgba(0,0,0,0.07);
+  --border-md:rgba(0,0,0,0.12);
+  --border-strong:rgba(0,0,0,0.18);
+  --text:#1A1916;
+  --text2:#6B6860;
+  --text3:#A8A59E;
+  --blue:#1A56DB;
+  --blue-light:#EEF3FD;
+  --blue-mid:#B5D4F4;
+  --blue-dark:#0C447C;
+  --green:#0E9F6E;
+  --green-light:#E8F8F2;
+  --green-dark:#065F46;
+  --amber:#D97706;
+  --amber-light:#FEF3C7;
+  --amber-dark:#78350F;
+  --red:#E02424;
+  --red-light:#FDE8E8;
+  --red-dark:#771D1D;
+  --purple:#7E3AF2;
+  --purple-light:#F3EEFF;
+  --purple-dark:#4A1D96;
+  --r:10px;--rsm:6px;--rlg:14px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+
+/* ── LAYOUT ── */
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{width:240px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh}
+.sidebar-logo{padding:20px 20px 16px;border-bottom:1px solid var(--border)}
+.sidebar-logo-mark{display:flex;align-items:center;gap:10px}
+.logo-icon{width:36px;height:36px;background:var(--blue);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-icon svg{color:#fff;width:20px;height:20px}
+.logo-text{font-size:15px;font-weight:600;letter-spacing:-0.2px}
+.logo-sub{font-size:11px;color:var(--text3);margin-top:1px}
+
+.sidebar-nav{flex:1;padding:12px 10px;overflow-y:auto}
+.nav-section{margin-bottom:20px}
+.nav-section-label{font-size:10px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);padding:0 10px;margin-bottom:6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r);cursor:pointer;font-size:14px;font-weight:500;color:var(--text2);transition:all 0.15s;border:none;background:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--blue-light);color:var(--blue)}
+.nav-item svg{width:18px;height:18px;flex-shrink:0;stroke-width:1.8}
+.nav-item .nav-badge{margin-left:auto;font-size:10px;font-weight:600;padding:2px 6px;border-radius:999px;background:var(--blue);color:#fff}
+
+.sidebar-footer{padding:14px;border-top:1px solid var(--border)}
+.user-chip{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:var(--r);cursor:pointer;transition:background 0.15s}
+.user-chip:hover{background:var(--surface2)}
+.avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:600;flex-shrink:0}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.back-btn{width:32px;height:32px;border-radius:var(--rsm);border:1px solid var(--border);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);transition:background 0.15s}
+.back-btn:hover{background:var(--surface2)}
+.topbar-title{font-size:16px;font-weight:600}
+.topbar-sub{font-size:12px;color:var(--text3);margin-left:8px}
+.topbar-right{display:flex;align-items:center;gap:8px}
+
+.content{flex:1;overflow-y:auto;padding:28px 32px}
+.content.centered{display:flex;align-items:center;justify-content:center}
+.content.no-pad{padding:0;overflow:hidden;display:flex;flex-direction:column}
+
+/* ── COMPONENTS ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);padding:20px;margin-bottom:14px}
+.card-sm{padding:14px 16px}
+.card-click{cursor:pointer;transition:border-color 0.15s,box-shadow 0.15s}
+.card-click:hover{border-color:var(--border-md);box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+
+.label{font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+h1{font-size:24px;font-weight:600;line-height:1.25;letter-spacing:-0.3px}
+h2{font-size:18px;font-weight:600;letter-spacing:-0.2px}
+h3{font-size:15px;font-weight:600}
+
+.badge{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px}
+.b-green{background:var(--green-light);color:var(--green-dark)}
+.b-amber{background:var(--amber-light);color:var(--amber-dark)}
+.b-blue{background:var(--blue-light);color:var(--blue-dark)}
+.b-red{background:var(--red-light);color:var(--red-dark)}
+.b-purple{background:var(--purple-light);color:var(--purple-dark)}
+.b-gray{background:var(--surface2);color:var(--text2)}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:var(--r);border:1px solid var(--border-md);background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.15s;white-space:nowrap}
+.btn:hover{background:var(--surface2)}
+.btn:active{transform:scale(0.98)}
+.btn-primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn-primary:hover{background:#1446b8;border-color:#1446b8}
+.btn-sm{padding:6px 13px;font-size:13px;border-radius:var(--rsm)}
+.btn-icon{width:34px;height:34px;padding:0;flex-shrink:0}
+
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;font-weight:500;color:var(--text2);margin-bottom:5px}
+.field input,.field textarea,.field select{width:100%;padding:9px 12px;border:1px solid var(--border-md);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color 0.15s}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(26,86,219,0.08)}
+.field textarea{resize:none;height:88px;line-height:1.5}
+
+.divider{border:none;border-top:1px solid var(--border);margin:14px 0}
+.prog-wrap{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.prog-bar{height:100%;border-radius:3px;transition:width 0.4s}
+.tag{display:inline-block;font-size:12px;padding:3px 10px;border-radius:999px;background:var(--surface2);color:var(--text2);margin:2px}
+
+/* ── LOGIN ── */
+.login-box{width:420px;text-align:center}
+.login-logo-big{width:72px;height:72px;background:var(--blue);border-radius:20px;margin:0 auto 20px;display:flex;align-items:center;justify-content:center}
+.login-logo-big svg{color:#fff;width:36px;height:36px}
+
+/* ── COURSES ── */
+.course-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* ── TOPIC ── */
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.cat-item{padding:10px 14px;border:1px solid var(--border-md);border-radius:var(--r);cursor:pointer;font-size:13px;font-weight:500;transition:all 0.15s;text-align:center}
+.cat-item:hover{border-color:var(--blue);color:var(--blue)}
+.cat-item.sel{border-color:var(--blue);background:var(--blue-light);color:var(--blue-dark)}
+
+/* ── SUPERVISOR ── */
+.sup-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.sup-card{border:1px solid var(--border);border-radius:var(--rlg);padding:18px;cursor:pointer;transition:all 0.15s}
+.sup-card:hover{border-color:var(--border-md);box-shadow:0 2px 8px rgba(0,0,0,0.06)}
+.sup-card.selected{border-color:var(--blue);border-width:1.5px;box-shadow:0 0 0 3px rgba(26,86,219,0.08)}
+.sup-card.full{opacity:0.55;cursor:default}
+.sup-card.full:hover{border-color:var(--border);box-shadow:none}
+
+/* ── GROUP ── */
+.type-toggle{display:flex;border:1px solid var(--border-md);border-radius:var(--r);overflow:hidden;width:240px}
+.type-btn{flex:1;padding:9px;font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;border:none;background:none;cursor:pointer;color:var(--text2);transition:all 0.15s}
+.type-btn.active{background:var(--blue);color:#fff}
+.member-chip{display:flex;align-items:center;gap:8px;background:var(--surface2);border-radius:var(--rsm);padding:7px 12px;margin-bottom:6px}
+
+/* ── DASHBOARD ── */
+.dash-header{background:var(--blue);border-radius:var(--rlg);padding:24px 28px;margin-bottom:20px;color:#fff;display:flex;align-items:center;gap:40px}
+.pct-big{font-size:48px;font-weight:700;font-family:'DM Mono',monospace;letter-spacing:-2px;line-height:1}
+.week-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.wk-card{border:1px solid var(--border);border-radius:var(--r);padding:14px;cursor:pointer;transition:all 0.15s;background:var(--surface)}
+.wk-card:hover{border-color:var(--border-md);box-shadow:0 2px 6px rgba(0,0,0,0.06)}
+.wk-card.done{border-color:var(--green);background:var(--green-light)}
+.wk-card.active-wk{border-color:var(--blue);border-width:1.5px}
+.wk-card.locked{opacity:0.45;cursor:default}
+.wk-card.locked:hover{border-color:var(--border);box-shadow:none}
+
+/* ── WEEK DETAIL ── */
+.week-detail-grid{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start}
+.task-item{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
+.task-item:last-child{border-bottom:none}
+.task-check{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border-strong);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all 0.15s}
+.task-check.done{background:var(--green);border-color:var(--green)}
+.task-check svg{width:12px;height:12px;color:transparent}
+.task-check.done svg{color:#fff}
+
+/* ── MEETINGS ── */
+.meetings-grid{display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start}
+.slot-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.slot{padding:8px 14px;border:1px solid var(--border-md);border-radius:var(--rsm);font-size:13px;cursor:pointer;transition:all 0.15s;background:var(--surface)}
+.slot:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.slot.taken{background:var(--surface2);color:var(--text3);text-decoration:line-through;pointer-events:none}
+.slot.booked{background:var(--green-light);border-color:var(--green);color:var(--green-dark);font-weight:600;pointer-events:none}
+.meeting-row{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.meeting-row:last-child{border-bottom:none}
+
+/* ── FILES ── */
+.files-shell{display:grid;grid-template-columns:280px 1fr;height:100%;overflow:hidden;gap:0}
+.files-list-panel{border-right:1px solid var(--border);overflow-y:auto;padding:16px 12px}
+.files-chat-panel{display:flex;flex-direction:column;overflow:hidden;height:100%}
+.file-row{display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:var(--r);cursor:pointer;transition:background 0.15s;margin-bottom:2px}
+.file-row:hover{background:var(--surface2)}
+.file-row.active{background:var(--blue-light)}
+.file-ico{width:38px;height:38px;border-radius:var(--rsm);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.ico-pdf{background:var(--red-light);color:var(--red-dark)}
+.ico-doc{background:var(--blue-light);color:var(--blue-dark)}
+.ico-note{background:var(--purple-light);color:var(--purple-dark)}
+.upload-zone{border:1.5px dashed var(--border-strong);border-radius:var(--r);padding:20px;text-align:center;cursor:pointer;transition:all 0.15s;margin-bottom:10px}
+.upload-zone:hover{border-color:var(--blue);background:var(--blue-light)}
+/* chat */
+.chat-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0;background:var(--surface)}
+.chat-messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:14px;background:var(--bg)}
+.chat-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--text3);gap:8px;background:var(--bg)}
+.msg-row{display:flex;gap:10px;align-items:flex-end}
+.msg-row.mine{flex-direction:row-reverse}
+.msg-bubble{max-width:68%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.55}
+.msg-bubble.theirs{background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:4px;color:var(--text)}
+.msg-bubble.mine{background:var(--blue);color:#fff;border-bottom-right-radius:4px}
+.msg-time{font-size:11px;color:var(--text3);margin-top:3px;text-align:right}
+.msg-time.theirs{text-align:left}
+.chat-input-bar{padding:14px 16px;border-top:1px solid var(--border);background:var(--surface);flex-shrink:0;display:flex;gap:8px;align-items:flex-end}
+.chat-input-bar textarea{flex:1;padding:9px 12px;border:1px solid var(--border-md);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:14px;resize:none;height:42px;max-height:120px;outline:none;background:var(--bg);color:var(--text);transition:border-color 0.15s;line-height:1.4}
+.chat-input-bar textarea:focus{border-color:var(--blue);background:#fff}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:#1A1916;color:#fff;padding:10px 20px;border-radius:var(--r);font-size:13px;font-weight:500;opacity:0;transition:all 0.25s;pointer-events:none;z-index:9999;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── ANIM ── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fade{animation:fadeIn 0.2s ease}
+
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar" style="display: none;">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"></path></svg>
+        </div>
+        <div>
+          <div class="logo-text">TS2 Research</div>
+          <div class="logo-sub">CBS · Master thesis</div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav" id="sidebar-nav"></nav>
+
+    <div class="sidebar-footer">
+      <div class="user-chip" id="user-chip">
+        <div class="avatar" style="width:34px;height:34px;background:var(--blue-light);color:var(--blue-dark);font-size:12px">RA</div>
+        <div style="min-width:0">
+          <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Redwan Ahmed</div>
+          <div style="font-size:11px;color:var(--text3)">au803318@uni.au.dk </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main area -->
+  <div class="main" id="main-area">
+    <div class="topbar" id="topbar-slot"><div class="topbar-left"><div><span class="topbar-title">Sign in</span></div></div><div class="topbar-right"><button class="btn btn-sm" style="gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 01-3.46 0"></path></svg></button></div></div>
+    <div class="content fade" id="content-area"><div style="display:flex;align-items:center;justify-content:center;min-height:100%"><div style="width:420px" class="fade"><div style="text-align:center;margin-bottom:28px"><div class="login-logo-big"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"></path></svg></div><h1 style="margin-bottom:6px">Welcome back</h1><p style="color:var(--text2);font-size:15px">Sign in to your research workspace</p></div><div class="card" style="padding:24px"><div class="field"><label>Student email</label><input type="email" id="inp-email" value="au803318@uni.au.dk @cbs.dk"></div><div class="field"><label>Password</label><input type="password" value="••••••••"></div><button class="btn btn-primary btn-full" id="btn-login" style="margin-top:4px">Sign in <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button></div><p style="text-align:center;font-size:12px;color:var(--text3);margin-top:16px">Academic Student</p></div></div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════ STATE ═══════════════ */
+var S = {
+  screen: 'login',
+  topic: { cat:'Digital transformation & innovation', name:'', title:'', desc:'' },
+  supervisor: null,
+  _supOpen: null,
+  projectType: 'solo',
+  projectName: '',
+  members: [],
+  taskChecks: {},
+  bookedSlots: [1],
+  uploadedFiles: [],
+  openWeek: null,
+  onboarded: false,
+  activeFile: 0,
+  chats: {},
+};
+
+/* ═══════════════ DATA ═══════════════ */
+var WEEKS = [
+  {id:0,num:'Wk 1–2',title:'Introduction',pct:100,status:'done',weeks:2,
+   desc:'Write the opening chapter. Set the scene, define the problem, and outline the thesis structure.',
+   tasks:['Introduce the research topic and context','Define the problem statement clearly','Outline the thesis structure and chapters','State the scope and limitations of the study']},
+  {id:1,num:'Wk 3',title:'Motivation',pct:100,status:'done',weeks:1,
+   desc:'Explain why this research matters. Connect your topic to real-world relevance and academic gaps.',
+   tasks:['Explain the practical relevance of the topic','Identify the academic gap being addressed','Justify why this research is timely and needed']},
+  {id:2,num:'Wk 4',title:'Research questions',pct:60,status:'active',weeks:1,
+   desc:'Formulate 2–3 focused, answerable research questions that guide the entire thesis.',
+   tasks:['Draft 2–3 clear research questions','Align questions with the problem statement','Verify questions are feasible within scope','Get supervisor feedback on RQ draft']},
+  {id:3,num:'Wk 5',title:'Methodology',pct:0,status:'pending',weeks:1,
+   desc:'Decide and justify your research approach — qualitative, quantitative, or mixed methods.',
+   tasks:['Choose qualitative, quantitative or mixed','Justify the methodological choice','Describe the data collection instrument','Address validity and reliability']},
+  {id:4,num:'Wk 6–7',title:'Theoretical background & literature',pct:0,status:'pending',weeks:2,
+   desc:'Build your theoretical framework and review existing academic literature comprehensively.',
+   tasks:['Identify key theories relevant to topic','Review minimum 15 academic sources','Write the literature review section','Map gaps in existing literature']},
+  {id:5,num:'Wk 8–9',title:'Empirical work & data',pct:0,status:'pending',weeks:2,
+   desc:'Conduct your data collection — interviews, surveys, or other instruments.',
+   tasks:['Prepare interview guide or survey instrument','Recruit and engage participants','Transcribe and organise all collected data','Document the data collection process fully']},
+  {id:6,num:'Wk 10',title:'Analysis & proposal',pct:0,status:'pending',weeks:1,
+   desc:'Analyse your collected data and connect findings to your research questions.',
+   tasks:['Code and categorise qualitative data','Run statistical analysis if applicable','Link key findings to research questions','Draft the analysis chapter']},
+  {id:7,num:'Wk 11–12',title:'Discussion & submission',pct:0,status:'pending',weeks:2,
+   desc:'Synthesise everything: write discussion, conclusion, and prepare the final submission.',
+   tasks:['Write discussion and conclusion chapters','State contributions and recommendations','Write abstract and executive summary','Compile and format the final document','Submit the completed thesis']},
+];
+
+var SUPS = [
+  {id:'PH',ini:'PH',name:'Prof. Peter Hansen',dept:'Dept. of Digitisation · CBS',field:'Digital innovation & platform design',slots:4,
+   tags:['Digital platforms','UX research','SME innovation','Tech adoption'],
+   bio:'Research interests in digital transformation, platform design, and technology adoption in organisations. Has supervised 40+ Master theses. Preferred methods: design science, case study.'},
+  {id:'MA',ini:'MA',name:'Dr. Maria Andersen',dept:'Dept. of Management · CBS',field:'Organisational behaviour',slots:2,
+   tags:['Team dynamics','Knowledge mgmt','Qualitative methods','Change management'],
+   bio:'Expert in organisational behaviour, team dynamics, and knowledge management. Preferred thesis methods: case study and grounded theory. Open to interdisciplinary topics.'},
+  {id:'JN',ini:'JN',name:'Prof. Jonas Nielsen',dept:'Dept. of Finance · CBS',field:'Finance & risk management',slots:0,
+   tags:['Risk modelling','ESG finance','Quantitative','Fixed income'],
+   bio:'Focuses on financial risk, ESG investing, and quantitative methods. Currently at full supervision capacity for this term.'},
+];
+
+var SLOTS = [
+  {l:'Mon 2 Jun · 10:00',taken:true},{l:'Mon 2 Jun · 14:00',taken:false},
+  {l:'Tue 3 Jun · 09:00',taken:false},{l:'Tue 3 Jun · 11:00',taken:false},
+  {l:'Wed 4 Jun · 13:00',taken:true},{l:'Thu 5 Jun · 10:00',taken:false},
+  {l:'Thu 5 Jun · 14:00',taken:false},{l:'Fri 6 Jun · 11:00',taken:false},
+  {l:'Mon 9 Jun · 09:00',taken:false},{l:'Mon 9 Jun · 14:00',taken:false},
+  {l:'Tue 10 Jun · 10:00',taken:true},{l:'Wed 11 Jun · 11:00',taken:false},
+];
+
+var FILES_DATA = [
+  {name:'Draft_Introduction_v2.pdf',type:'pdf',week:'Week 1–2',date:'28 May',status:'pending',
+   comment:null},
+  {name:'ResearchQuestions_draft.docx',type:'doc',week:'Week 4',date:'20 May',status:'feedback',
+   comment:'Good structure overall. Please strengthen the link between your problem statement and the theoretical framework. Aim for at least 3 post-2020 sources in the next draft.'},
+  {name:'Supervisor note — Week 3',type:'note',week:'Week 3',date:'18 May',status:'note',
+   comment:'Your motivation section is a solid start. Focus the next revision on clearly articulating the academic gap your work addresses. See highlighted sections in the returned PDF.'},
+];
+
+var CATS = ['Digital transformation & innovation','Sustainability & ESG','Organisational behaviour','Finance & risk management','Marketing & consumer behaviour','Entrepreneurship & innovation'];
+
+/* ═══════════════ HELPERS ═══════════════ */
+function ic(name,sz){
+  sz=sz||18;
+  var p={
+    back:'<polyline points="15 18 9 12 15 6"/>',
+    book:'<path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>',
+    dash:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>',
+    cal:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+    files:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>',
+    check:'<polyline points="20 6 9 17 4 12"/>',
+    plus:'<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+    upload:'<polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/>',
+    arrow:'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>',
+    user:'<path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+    msg:'<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>',
+    lock:'<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>',
+    flag:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>',
+    bell:'<path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>',
+    sup:'<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>',
+    gear:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>',
+  };
+  return '<svg width="'+sz+'" height="'+sz+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+(p[name]||p.book)+'</svg>';
+}
+
+function pct(){
+  var tot=0,done=0;
+  WEEKS.forEach(function(w){tot+=w.weeks;done+=(w.pct/100)*w.weeks;});
+  return Math.round((done/tot)*100);
+}
+
+function toast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2600);
+}
+
+function goto(sc){
+  S.screen=sc;
+  render();
+  var c=document.getElementById('content-area');
+  if(c) c.scrollTop=0;
+}
+
+/* ═══════════════ SIDEBAR NAV ═══════════════ */
+function renderSidebar(){
+  var nav=document.getElementById('sidebar-nav');
+  if(!S.onboarded){nav.innerHTML='';return;}
+  var items=[
+    {id:'dashboard',label:'Dashboard',icon:'dash'},
+    {id:'meetings',label:'Meetings',icon:'cal'},
+    {id:'files',label:'Files & feedback',icon:'files'},
+  ];
+  var html='<div class="nav-section"><div class="nav-section-label">Workspace</div>';
+  items.forEach(function(it){
+    var active=(S.screen===it.id||(S.screen==='weekdetail'&&it.id==='dashboard'))?' active':'';
+    html+='<button class="nav-item'+active+'" data-nav="'+it.id+'">'+ic(it.icon,18)+'<span>'+it.label+'</span></button>';
+  });
+  html+='</div>';
+  html+='<div class="nav-section"><div class="nav-section-label">Project</div>';
+  html+='<button class="nav-item" data-nav="supervisor"><div style="display:flex;align-items:center;gap:8px">'+ic('sup',18)+'<span>Supervisor</span></div></button>';
+  html+='</div>';
+  nav.innerHTML=html;
+  nav.querySelectorAll('[data-nav]').forEach(function(el){
+    el.addEventListener('click',function(){goto(this.getAttribute('data-nav'));});
+  });
+}
+
+/* ═══════════════ TOPBAR ═══════════════ */
+function renderTopbar(){
+  var sc=S.screen;
+  var cfg={
+    login:{title:'Sign in',sub:''},
+    courses:{title:'My courses',sub:''},
+    topic:{title:'Topic selection',sub:'TS2 · Master thesis',back:'courses'},
+    supervisor:{title:'Supervisor',sub:S.onboarded?'Change or view supervisor':'Choose your supervisor',back:S.onboarded?null:'topic'},
+    group:{title:'Project setup',sub:'TS2 · Master thesis',back:'supervisor'},
+    dashboard:{title:'Dashboard',sub:S.projectName||'Research project'},
+    weekdetail:{title:S.openWeek!==null?WEEKS[S.openWeek].title:'Week detail',sub:'Dashboard',back:'dashboard'},
+    meetings:{title:'Meetings',sub:'Book time with your supervisor'},
+    files:{title:'Files & feedback',sub:'Shared drafts and supervisor notes'},
+  };
+  var c=cfg[sc]||{title:sc,sub:''};
+  var tb=document.getElementById('topbar-slot');
+  var backHtml=c.back?'<button class="back-btn" id="btn-back">'+ic('back',15)+'</button>':'';
+  var rightHtml='<button class="btn btn-sm" style="gap:6px">'+ic('bell',14)+'</button>';
+  tb.innerHTML='<div class="topbar-left">'+backHtml+'<div><span class="topbar-title">'+c.title+'</span>'+(c.sub?'<span class="topbar-sub">'+c.sub+'</span>':'')+'</div></div><div class="topbar-right">'+rightHtml+'</div>';
+  if(c.back){
+    document.getElementById('btn-back').addEventListener('click',function(){
+      if(sc==='weekdetail'){S.openWeek=null;}
+      goto(c.back);
+    });
+  }
+}
+
+/* ═══════════════ SCREENS ═══════════════ */
+function screenLogin(){
+  return '<div style="display:flex;align-items:center;justify-content:center;min-height:100%">'
+    +'<div style="width:420px" class="fade">'
+    +'<div style="text-align:center;margin-bottom:28px">'
+    +'<div class="login-logo-big">'+ic('book',34)+'</div>'
+    +'<h1 style="margin-bottom:6px">Welcome back</h1>'
+    +'<p style="color:var(--text2);font-size:15px">Sign in to your research workspace</p>'
+    +'</div>'
+    +'<div class="card" style="padding:24px">'
+    +'<div class="field"><label>Student email</label><input type="email" id="inp-email" value="au803318@uni.au.dk "/></div>'
+    +'<div class="field"><label>Password</label><input type="password" value="••••••••"/></div>'
+    +'<button class="btn btn-primary btn-full" id="btn-login" style="margin-top:4px">Sign in '+ic('arrow',16)+'</button>'
+    +'</div>'
+    +'<p style="text-align:center;font-size:12px;color:var(--text3);margin-top:16px">Student portal</p>'
+    +'</div></div>';
+}
+
+function screenCourses(){
+  return '<div class="fade">'
+    +'<p class="label">Enrolled courses</p>'
+    +'<div class="course-row">'
+    +'<div class="card card-click" id="goto-ts2" style="border-left:3px solid var(--blue)">'
+    +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:14px">'
+    +'<div><h3 style="margin-bottom:3px">TS2</h3><p style="font-size:13px;color:var(--text2)">MSc · Spring 2026</p></div>'
+    +'<span class="badge b-amber">Setup needed</span></div>'
+    +'<hr class="divider"/>'
+    +'<div style="display:flex;gap:24px">'
+    +'<div><p style="font-size:11px;color:var(--text3)">Deadline</p><p style="font-weight:600">15 Aug 2026</p></div>'
+    +'<div><p style="font-size:11px;color:var(--text3)">Credits</p><p style="font-weight:600">30 ECTS</p></div>'
+    +'<div><p style="font-size:11px;color:var(--text3)">Progress</p><p style="font-weight:600;color:var(--blue)">'+pct()+'%</p></div>'
+    +'</div></div>'
+    +'<div class="card" style="opacity:0.6">'
+    +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'
+    +'<div><h3 style="margin-bottom:3px">MOT</h3><p style="font-size:13px;color:var(--text2)">MSc Business Administration · Fall 2025</p></div>'
+    +'<span class="badge b-green">Completed</span></div>'
+    +'</div></div></div>';
+}
+
+function screenTopic(){
+  var cats=CATS.map(function(c){
+    return '<div class="cat-item'+(S.topic.cat===c?' sel':'')+'" data-cat="'+c+'">'+c+'</div>';
+  }).join('');
+  return '<div class="fade" style="max-width:680px">'
+    +'<p class="label">Browse research categories</p>'
+    +'<div class="cat-grid">'+cats+'</div>'
+    +'<div class="card">'
+    +'<div class="field"><label>Topic name</label><input type="text" id="inp-tname" value="'+S.topic.name+'" placeholder="e.g. AI adoption in SMEs"/></div>'
+    +'<div class="field"><label>Full project title</label><input type="text" id="inp-ttitle" value="'+S.topic.title+'" placeholder="Thesis title as it will appear on the cover page"/></div>'
+    +'<div class="field"><label>Project description</label><textarea id="inp-tdesc" placeholder="Brief description of your research focus and approach...">'+S.topic.desc+'</textarea></div>'
+    +'<button class="btn btn-primary" id="btn-topic-next">Continue '+ic('arrow',16)+'</button>'
+    +'</div></div>';
+}
+
+function screenSupervisor(){
+  if(S._supOpen){
+    var s=SUPS.filter(function(x){return x.id===S._supOpen;})[0];
+    var tags=s.tags.map(function(t){return '<span class="tag">'+t+'</span>';}).join('');
+    var canSel=s.slots>0;
+    return '<div class="fade" style="max-width:560px">'
+      +'<button class="btn btn-sm" id="btn-sup-back" style="margin-bottom:16px">'+ic('back',14)+' All supervisors</button>'
+      +'<div class="card" style="border-color:var(--blue);border-width:1.5px">'
+      +'<div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">'
+      +'<div class="avatar" style="width:60px;height:60px;background:var(--blue-light);color:var(--blue-dark);font-size:18px">'+s.ini+'</div>'
+      +'<div><h2 style="margin-bottom:3px">'+s.name+'</h2><p style="color:var(--text2);font-size:14px">'+s.dept+'</p>'
+      +(canSel?'<span class="badge b-green" style="margin-top:5px">'+s.slots+' slots open</span>':'<span class="badge b-red" style="margin-top:5px">Full capacity</span>')
+      +'</div></div>'
+      +'<p style="font-size:14px;color:var(--text2);line-height:1.65;margin-bottom:14px">'+s.bio+'</p>'
+      +'<div style="margin-bottom:18px">'+tags+'</div>'
+      +(canSel
+        ?'<button class="btn btn-primary" data-sup-sel="'+s.id+'">Request supervision '+ic('arrow',16)+'</button>'
+        :'<button class="btn" disabled style="opacity:0.5;cursor:not-allowed">'+ic('lock',14)+' At full capacity</button>')
+      +'</div></div>';
+  }
+  var cards=SUPS.map(function(s){
+    var full=s.slots===0;
+    return '<div class="sup-card'+(full?' full':'')+'" '+(full?'':' data-sup-open="'+s.id+'"')+'>'
+      +'<div class="avatar" style="width:48px;height:48px;background:var(--blue-light);color:var(--blue-dark);font-size:15px;margin-bottom:12px">'+s.ini+'</div>'
+      +'<h3 style="margin-bottom:3px">'+s.name+'</h3>'
+      +'<p style="font-size:12px;color:var(--text2);margin-bottom:10px">'+s.field+'</p>'
+      +(full?'<span class="badge b-red">Full</span>':'<span class="badge b-green">'+s.slots+' slots open</span>')
+      +'</div>';
+  }).join('');
+  return '<div class="fade">'
+    +'<div style="display:flex;gap:10px;margin-bottom:16px"><input type="text" placeholder="Search by name or research field…" style="max-width:340px;padding:9px 12px;border:1px solid var(--border-md);border-radius:var(--r);font-size:14px;background:var(--bg);outline:none"/></div>'
+    +'<div class="sup-grid">'+cards+'</div>'
+    +'</div>';
+}
+
+function screenGroup(){
+  var isSolo=S.projectType==='solo';
+  var mems=S.members.map(function(m){
+    return '<div class="member-chip">'
+      +'<div class="avatar" style="width:28px;height:28px;background:var(--blue-light);color:var(--blue-dark);font-size:11px">'+m.ini+'</div>'
+      +'<span style="font-size:13px;flex:1">'+m.name+' <span style="color:var(--text3)">· '+m.id+'</span></span>'
+      +'<span class="badge b-green">Invited</span>'
+      +'</div>';
+  }).join('');
+  return '<div class="fade" style="max-width:560px">'
+    +'<div class="card">'
+    +'<div class="field"><label>Project name</label><input type="text" id="inp-pname" value="'+S.projectName+'" placeholder="Give your project a name"/></div>'
+    +'<p class="label" style="margin-top:6px">Project type</p>'
+    +'<div class="type-toggle" style="margin-bottom:16px">'
+    +'<button class="type-btn'+(isSolo?' active':'')+'" data-type="solo">Solo</button>'
+    +'<button class="type-btn'+(!isSolo?' active':'')+'" data-type="group">Group</button>'
+    +'</div>'
+    +(!isSolo?'<div><p class="label">Invite group members</p>'
+      +'<div style="display:flex;gap:8px;margin-bottom:10px">'
+      +'<input type="text" id="inp-memid" placeholder="Student ID e.g. s20492" style="flex:1"/>'
+      +'<button class="btn btn-sm" id="btn-addmem">'+ic('plus',16)+' Add</button>'
+      +'</div>'+mems+'</div>':'')
+    +'<hr class="divider"/>'
+    +'<button class="btn btn-primary" id="btn-start">Start project '+ic('arrow',16)+'</button>'
+    +'</div></div>';
+}
+
+function screenDashboard(){
+  var p=pct();
+  var sup=S.supervisor||SUPS[0];
+  var cards=WEEKS.map(function(w){
+    var cls='wk-card'+(w.status==='done'?' done':w.status==='active'?' active-wk':' locked');
+    var badge=w.status==='done'?'<span class="badge b-green" style="font-size:10px">'+ic('check',10)+' Done</span>'
+      :w.status==='active'?'<span class="badge b-amber" style="font-size:10px">In progress</span>':'';
+    var pc=w.status==='done'?'var(--green)':w.status==='active'?'var(--amber)':'var(--border-strong)';
+    var click=w.status!=='locked'?' data-wk="'+w.id+'"':'';
+    return '<div class="'+cls+'"'+click+'>'
+      +'<p style="font-size:10px;color:var(--text3);margin-bottom:3px">'+w.num+'</p>'
+      +'<p style="font-size:13px;font-weight:600;line-height:1.3;margin-bottom:8px">'+w.title+'</p>'
+      +badge
+      +'<div class="prog-wrap" style="margin-top:8px"><div class="prog-bar" style="width:'+w.pct+'%;background:'+pc+'"></div></div>'
+      +'<p style="font-size:11px;color:var(--text3);margin-top:4px">'+w.pct+'%</p>'
+      +'</div>';
+  }).join('');
+  return '<div class="fade">'
+    +'<div class="dash-header">'
+    +'<div><p style="font-size:13px;opacity:0.75;margin-bottom:6px">Overall progress</p>'
+    +'<div class="pct-big">'+p+'%</div>'
+    +'<p style="font-size:13px;opacity:0.7;margin-top:6px">Week 4 of 12</p></div>'
+    +'<div style="flex:1">'
+    +'<div style="background:rgba(255,255,255,0.2);height:8px;border-radius:4px;margin-bottom:10px"><div style="background:#fff;height:8px;border-radius:4px;width:'+p+'%"></div></div>'
+    +'<p style="font-size:14px;font-weight:500">Next: Research questions draft</p>'
+    +'<p style="font-size:13px;opacity:0.75;margin-top:3px">Upload draft by end of this week</p>'
+    +'</div>'
+    +'<div style="text-align:right">'
+    +'<p style="font-size:13px;opacity:0.75;margin-bottom:4px">Supervisor</p>'
+    +'<p style="font-size:15px;font-weight:600">'+sup.name.split(' ').slice(-1)[0]+'</p>'
+    +'<p style="font-size:12px;opacity:0.75;margin-top:2px">'+sup.dept.split(' ·')[0]+'</p>'
+    +'</div>'
+    +'</div>'
+    +'<p class="label">Writing plan — 12 weeks</p>'
+    +'<div class="week-grid">'+cards+'</div>'
+    +'</div>';
+}
+
+function screenWeekDetail(){
+  var w=WEEKS[S.openWeek]; if(!w) return '';
+  var chk=S.taskChecks[w.id]||{};
+  var tdone=w.tasks.filter(function(_,i){return chk[i];}).length;
+  var tasks=w.tasks.map(function(t,i){
+    var d=chk[i]?' done':'';
+    return '<div class="task-item">'
+      +'<div class="task-check'+d+'" data-tc="'+i+'"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>'
+      +'<p style="font-size:14px;line-height:1.5">'+t+'</p>'
+      +'</div>';
+  }).join('');
+  var pc=w.status==='done'?'var(--green)':w.status==='active'?'var(--amber)':'var(--blue)';
+  return '<div class="fade week-detail-grid">'
+    +'<div>'
+    +'<div class="card">'
+    +'<p style="font-size:12px;color:var(--text3);margin-bottom:4px">'+w.num+'</p>'
+    +'<h2 style="margin-bottom:8px">'+w.title+'</h2>'
+    +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">'
+    +'<div class="prog-wrap" style="flex:1"><div class="prog-bar" style="width:'+w.pct+'%;background:'+pc+'"></div></div>'
+    +'<p style="font-size:13px;font-weight:600;color:var(--text2);white-space:nowrap">'+tdone+' / '+w.tasks.length+' tasks</p>'
+    +'</div>'
+    +'<p style="font-size:14px;color:var(--text2);line-height:1.65">'+w.desc+'</p>'
+    +'</div>'
+    +'<p class="label">Tasks</p>'
+    +'<div class="card card-sm">'+tasks+'</div>'
+    +'</div>'
+    +'<div>'
+    +'<p class="label">Submit draft</p>'
+    +'<div class="card">'
+    +'<div class="upload-zone" id="btn-upload-wk">'
+    +ic('upload',24)
+    +'<p style="font-size:14px;font-weight:500;margin-top:10px">Upload draft for this section</p>'
+    +'<p style="font-size:12px;color:var(--text3);margin-top:4px">PDF or Word document accepted</p>'
+    +'</div></div>'
+    +'<p class="label">Quick actions</p>'
+    +'<div class="card card-sm" style="display:flex;flex-direction:column;gap:8px">'
+    +'<button class="btn" style="justify-content:flex-start" data-nav="meetings">'+ic('cal',16)+' Book meeting with supervisor</button>'
+    +'<button class="btn" style="justify-content:flex-start" data-nav="files">'+ic('msg',16)+' View feedback & files</button>'
+    +'</div>'
+    +'<p class="label">Progress</p>'
+    +'<div class="card card-sm" style="text-align:center">'
+    +'<p style="font-size:36px;font-weight:700;font-family:\'DM Mono\',monospace;color:'+pc+';letter-spacing:-1px">'+w.pct+'%</p>'
+    +'<p style="font-size:13px;color:var(--text2);margin-top:4px">Section complete</p>'
+    +'</div>'
+    +'</div></div>';
+}
+
+function screenMeetings(){
+  var sup=S.supervisor||SUPS[0];
+  var slots=SLOTS.map(function(s,i){
+    var cls=s.taken?' taken':S.bookedSlots.indexOf(i)>-1?' booked':'';
+    var txt=S.bookedSlots.indexOf(i)>-1?ic('check',12)+' '+s.l:s.l;
+    return '<div class="slot'+cls+'" '+((!s.taken&&S.bookedSlots.indexOf(i)===-1)?'data-bs="'+i+'"':'')+'>'+txt+'</div>';
+  }).join('');
+  var upcoming=S.bookedSlots.map(function(i){
+    return '<div class="meeting-row">'
+      +'<div style="width:42px;height:42px;background:var(--blue-light);border-radius:var(--rsm);display:flex;align-items:center;justify-content:center;color:var(--blue);flex-shrink:0">'+ic('cal',20)+'</div>'
+      +'<div style="flex:1"><p style="font-size:14px;font-weight:600">Meeting with '+sup.name+'</p>'
+      +'<p style="font-size:13px;color:var(--text2);margin-top:2px">'+SLOTS[i].l+' · Online (Teams)</p>'
+      +'<p style="font-size:12px;color:var(--text3);margin-top:4px">Agenda: Review draft and discuss next steps.</p>'
+      +'</div><span class="badge b-blue">Confirmed</span></div>';
+  }).join('');
+  return '<div class="fade meetings-grid">'
+    +'<div>'
+    +'<p class="label">Available slots — June 2026</p>'
+    +'<div class="card"><div class="slot-grid">'+slots+'</div>'
+    +'<p style="font-size:12px;color:var(--text3);margin-top:6px">Strikethrough = already booked. Green = your confirmed booking. Click a free slot to book it.</p>'
+    +'</div></div>'
+    +'<div>'
+    +'<div class="card card-sm" style="display:flex;align-items:center;gap:12px;margin-bottom:14px">'
+    +'<div class="avatar" style="width:46px;height:46px;background:var(--blue-light);color:var(--blue-dark);font-size:14px">'+sup.ini+'</div>'
+    +'<div><p style="font-size:14px;font-weight:600">'+sup.name+'</p>'
+    +'<p style="font-size:12px;color:var(--text2)">Your supervisor</p>'
+    +'<p style="font-size:12px;color:var(--text3);margin-top:2px">'+sup.dept+'</p>'
+    +'</div></div>'
+    +'<p class="label">Upcoming meetings</p>'
+    +'<div class="card card-sm">'+(upcoming||'<p style="font-size:13px;color:var(--text3)">No meetings booked yet.</p>')+'</div>'
+    +'</div></div>';
+}
+
+function screenFiles(){
+  var sup=S.supervisor||SUPS[0];
+  // seed default chat messages if not yet set
+  FILES_DATA.forEach(function(f,i){
+    if(!S.chats[i]){
+      var msgs=[];
+      if(f.comment){
+        msgs.push({from:'sup',text:f.comment,time:f.date+', 09:14'});
+      }
+      if(i===0){
+        msgs.push({from:'me',text:'Hi Prof. '+sup.name.split(' ').slice(-1)[0]+', I have uploaded the Introduction draft. Please let me know your thoughts.',time:'28 May, 14:02'});
+        if(f.comment) msgs.unshift({from:'me',text:'Hi Prof. '+sup.name.split(' ').slice(-1)[0]+', I have uploaded the Introduction draft. Please let me know your thoughts.',time:'28 May, 14:02'});
+      }
+      if(i===1){
+        msgs=[
+          {from:'me',text:'I have uploaded my research questions draft. I restructured them based on our last meeting.',time:'20 May, 11:30'},
+          {from:'sup',text:f.comment,time:'20 May, 16:45'},
+          {from:'me',text:'Thank you! I will work on linking the problem statement more clearly to the theoretical framework.',time:'20 May, 17:10'},
+        ];
+      }
+      if(i===2){
+        msgs=[
+          {from:'sup',text:f.comment,time:'18 May, 09:14'},
+          {from:'me',text:'Thank you, I will revise the motivation section and pay attention to the academic gap.',time:'18 May, 10:30'},
+        ];
+      }
+      S.chats[i]=msgs;
+    }
+  });
+
+  // add uploaded files to list
+  var allFiles=FILES_DATA.slice();
+  S.uploadedFiles.forEach(function(name){
+    allFiles.unshift({name:name,type:'pdf',week:'Recently uploaded',date:'Today',status:'pending',comment:null});
+  });
+
+  var af=S.activeFile;
+  var listHtml='<div class="upload-zone" id="btn-upload-f">'+ic('upload',20)+'<p style="font-size:13px;font-weight:500;margin-top:8px">Upload new draft</p><p style="font-size:11px;color:var(--text3);margin-top:3px">PDF or Word</p></div>';
+  listHtml+='<p class="label">Files & threads</p>';
+  allFiles.forEach(function(f,i){
+    var icls=f.type==='pdf'?'ico-pdf':f.type==='doc'?'ico-doc':'ico-note';
+    var ilbl=f.type==='pdf'?'PDF':f.type==='doc'?'DOC':ic('msg',14);
+    var active=i===af?' active':'';
+    var badge=f.status==='pending'?'<span class="badge b-amber" style="font-size:10px">Pending</span>'
+      :f.status==='feedback'?'<span class="badge b-green" style="font-size:10px">Feedback</span>'
+      :'<span class="badge b-purple" style="font-size:10px">Note</span>';
+    var msgCount=S.chats[i]?S.chats[i].length:0;
+    listHtml+='<div class="file-row'+active+'" data-fsel="'+i+'">'
+      +'<div class="file-ico '+icls+'">'+ilbl+'</div>'
+      +'<div style="flex:1;min-width:0">'
+      +'<p style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+f.name+'</p>'
+      +'<p style="font-size:11px;color:var(--text3);margin-top:1px">'+f.week+'</p>'
+      +'</div>'
+      +(msgCount>0?'<span style="font-size:10px;background:var(--surface2);color:var(--text2);padding:2px 7px;border-radius:999px;font-weight:600">'+msgCount+'</span>':'')
+      +'</div>';
+  });
+
+  // chat panel
+  var curFile=allFiles[af]||allFiles[0];
+  var curMsgs=S.chats[af]||[];
+  var msgsHtml=curMsgs.length===0
+    ?'<div class="chat-empty">'+ic('msg',32)+'<p style="font-size:14px;font-weight:500">No messages yet</p><p style="font-size:13px">Start the conversation about this draft</p></div>'
+    :'';
+  if(curMsgs.length>0){
+    msgsHtml=curMsgs.map(function(m){
+      var isMe=m.from==='me';
+      var bubble='<div class="msg-bubble '+(isMe?'mine':'theirs')+'">'+m.text+'</div>';
+      var time='<p class="msg-time '+(isMe?'':'theirs')+'">'+m.time+'</p>';
+      var av=isMe?'':'<div class="avatar" style="width:30px;height:30px;background:var(--blue-light);color:var(--blue-dark);font-size:10px;margin-bottom:2px">'+sup.ini+'</div>';
+      return '<div class="msg-row'+(isMe?' mine':'')+'">'
+        +(!isMe?av:'')
+        +'<div>'+(isMe?'':('<p style="font-size:11px;color:var(--text3);margin-bottom:3px">'+sup.name+'</p>'))
+        +bubble+time+'</div>'
+        +'</div>';
+    }).join('');
+  }
+
+  var chatPanel='<div class="chat-header">'
+    +'<div class="file-ico '+(curFile.type==='pdf'?'ico-pdf':curFile.type==='doc'?'ico-doc':'ico-note')+'" style="width:34px;height:34px;font-size:10px">'
+    +(curFile.type==='pdf'?'PDF':curFile.type==='doc'?'DOC':ic('msg',13))+'</div>'
+    +'<div style="flex:1;min-width:0"><p style="font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+curFile.name+'</p>'
+    +'<p style="font-size:12px;color:var(--text3)">'+curFile.week+' · with '+sup.name+'</p></div>'
+    +'</div>'
+    +'<div class="chat-messages" id="chat-msgs">'+msgsHtml+'</div>'
+    +'<div class="chat-input-bar">'
+    +'<div class="avatar" style="width:32px;height:32px;background:var(--blue-light);color:var(--blue-dark);font-size:11px;margin-bottom:2px">RA</div>'
+    +'<textarea id="chat-inp" placeholder="Write a message to your supervisor…"></textarea>'
+    +'<button class="btn btn-primary btn-icon" id="btn-send-chat" style="height:42px;width:42px;border-radius:var(--r)">'+ic('arrow',16)+'</button>'
+    +'</div>';
+
+  return '<div class="files-shell fade">'
+    +'<div class="files-list-panel">'+listHtml+'</div>'
+    +'<div class="files-chat-panel">'+chatPanel+'</div>'
+    +'</div>';
+}
+
+/* ═══════════════ SCROLL CHAT ═══════════════ */
+function scrollChat(){
+  var el=document.getElementById('chat-msgs');
+  if(el) el.scrollTop=el.scrollHeight;
+}
+
+/* ═══════════════ RENDER ═══════════════ */
+function render(){
+  var sc=S.screen;
+  renderTopbar();
+  renderSidebar();
+  var map={login:screenLogin,courses:screenCourses,topic:screenTopic,
+    supervisor:screenSupervisor,group:screenGroup,dashboard:screenDashboard,
+    weekdetail:screenWeekDetail,meetings:screenMeetings,files:screenFiles};
+  var ca=document.getElementById('content-area');
+  ca.innerHTML=(map[sc]||function(){return '';})();
+  ca.className='content fade'+(sc==='files'?' no-pad':'');
+
+  // hide sidebar on pre-onboarding screens
+  var preonboard=['login','courses','topic','group'];
+  document.getElementById('sidebar').style.display=
+    (preonboard.indexOf(sc)>-1&&!S.onboarded)?'none':'flex';
+  // show supervisor in sidebar always after onboarding
+  if(sc==='supervisor'&&S.onboarded){
+    document.getElementById('sidebar').style.display='flex';
+  }
+
+  attachEvents(sc);
+}
+
+function attachEvents(sc){
+  // nav items
+  document.querySelectorAll('[data-nav]').forEach(function(el){
+    el.addEventListener('click',function(e){e.stopPropagation();goto(this.getAttribute('data-nav'));});
+  });
+
+  if(sc==='login'){
+    document.getElementById('btn-login').addEventListener('click',function(){goto('courses');});
+  }
+  if(sc==='courses'){
+    document.getElementById('goto-ts2').addEventListener('click',function(){goto('topic');});
+  }
+  if(sc==='topic'){
+    document.querySelectorAll('.cat-item').forEach(function(el){
+      el.addEventListener('click',function(){
+        S.topic.cat=this.getAttribute('data-cat');
+        document.querySelectorAll('.cat-item').forEach(function(x){x.classList.remove('sel');});
+        this.classList.add('sel');
+      });
+    });
+    document.getElementById('btn-topic-next').addEventListener('click',function(){
+      S.topic.name=document.getElementById('inp-tname').value.trim();
+      S.topic.title=document.getElementById('inp-ttitle').value.trim();
+      S.topic.desc=document.getElementById('inp-tdesc').value.trim();
+      if(!S.topic.name||!S.topic.title){toast('Please fill in topic name and title');return;}
+      goto('supervisor');
+    });
+  }
+  if(sc==='supervisor'){
+    document.querySelectorAll('[data-sup-open]').forEach(function(el){
+      el.addEventListener('click',function(){S._supOpen=this.getAttribute('data-sup-open');render();});
+    });
+    var bsb=document.getElementById('btn-sup-back');
+    if(bsb) bsb.addEventListener('click',function(){S._supOpen=null;render();});
+    document.querySelectorAll('[data-sup-sel]').forEach(function(el){
+      el.addEventListener('click',function(){
+        var id=this.getAttribute('data-sup-sel');
+        S.supervisor=SUPS.filter(function(s){return s.id===id;})[0];
+        S._supOpen=null;
+        toast('Supervision request sent to '+S.supervisor.name);
+        setTimeout(function(){goto(S.onboarded?'dashboard':'group');},800);
+      });
+    });
+  }
+  if(sc==='group'){
+    document.querySelectorAll('.type-btn').forEach(function(el){
+      el.addEventListener('click',function(){S.projectType=this.getAttribute('data-type');render();});
+    });
+    var bam=document.getElementById('btn-addmem');
+    if(bam){
+      bam.addEventListener('click',function(){
+        var v=document.getElementById('inp-memid').value.trim();
+        if(!v){return;}
+        S.members.push({id:v,name:'Student '+v,ini:v.slice(0,2).toUpperCase()});
+        document.getElementById('inp-memid').value='';
+        render(); toast('Invite sent to '+v);
+      });
+    }
+    document.getElementById('btn-start').addEventListener('click',function(){
+      var n=document.getElementById('inp-pname').value.trim();
+      if(!n){toast('Please enter a project name');return;}
+      S.projectName=n; S.onboarded=true;
+      goto('dashboard');
+    });
+  }
+  if(sc==='dashboard'){
+    document.querySelectorAll('[data-wk]').forEach(function(el){
+      el.addEventListener('click',function(){
+        S.openWeek=parseInt(this.getAttribute('data-wk'));
+        goto('weekdetail');
+      });
+    });
+  }
+  if(sc==='weekdetail'){
+    document.querySelectorAll('[data-tc]').forEach(function(el){
+      el.addEventListener('click',function(){
+        var i=parseInt(this.getAttribute('data-tc'));
+        var wid=S.openWeek;
+        if(!S.taskChecks[wid]) S.taskChecks[wid]={};
+        S.taskChecks[wid][i]=!S.taskChecks[wid][i];
+        var done=0,total=WEEKS[wid].tasks.length;
+        for(var k=0;k<total;k++){if(S.taskChecks[wid][k])done++;}
+        WEEKS[wid].pct=Math.round((done/total)*100);
+        if(done===total){WEEKS[wid].status='done';toast('Section complete!');}
+        else if(done>0) WEEKS[wid].status='active';
+        render();
+      });
+    });
+    var ubw=document.getElementById('btn-upload-wk');
+    if(ubw){
+      ubw.addEventListener('click',function(){
+        var name='Draft_'+WEEKS[S.openWeek].title.replace(/[^a-zA-Z0-9]/g,'_')+'_v1.pdf';
+        S.uploadedFiles.unshift(name); toast('Draft uploaded: '+name);
+      });
+    }
+  }
+  if(sc==='meetings'){
+    document.querySelectorAll('[data-bs]').forEach(function(el){
+      el.addEventListener('click',function(){
+        var i=parseInt(this.getAttribute('data-bs'));
+        if(S.bookedSlots.indexOf(i)===-1){
+          S.bookedSlots.push(i);
+          toast('Meeting booked: '+SLOTS[i].l);
+          render();
+        }
+      });
+    });
+  }
+  if(sc==='files'){
+    // file selection
+    document.querySelectorAll('[data-fsel]').forEach(function(el){
+      el.addEventListener('click',function(){
+        S.activeFile=parseInt(this.getAttribute('data-fsel'));
+        render();
+        setTimeout(scrollChat,50);
+      });
+    });
+    // upload
+    var uf=document.getElementById('btn-upload-f');
+    if(uf){
+      uf.addEventListener('click',function(){
+        var names=['Draft_v'+Math.ceil(Math.random()*3)+'_'+['Introduction','Methodology','Analysis'][Math.floor(Math.random()*3)]+'.pdf','Chapter_notes.docx','Revised_draft.pdf'];
+        var n=names[Math.floor(Math.random()*names.length)];
+        S.uploadedFiles.unshift(n);
+        S.activeFile=0;
+        toast('File uploaded: '+n);
+        render(); setTimeout(scrollChat,50);
+      });
+    }
+    // send message
+    function sendMsg(){
+      var inp=document.getElementById('chat-inp');
+      var txt=inp?inp.value.trim():'';
+      if(!txt) return;
+      if(!S.chats[S.activeFile]) S.chats[S.activeFile]=[];
+      var now=new Date();
+      var timeStr=now.getDate()+' Jun, '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+      S.chats[S.activeFile].push({from:'me',text:txt,time:timeStr});
+      inp.value=''; inp.style.height='42px';
+      render(); setTimeout(scrollChat,50);
+      // simulate supervisor reply after 1.5s
+      setTimeout(function(){
+        var replies=[
+          'Thank you for sharing this. I will review it and get back to you shortly.',
+          'Good progress! I have a few comments — I will send them after I read through the full draft.',
+          'Looks like a solid direction. Can you elaborate a bit more on the methodology choice?',
+          'I will review this before our next meeting. Keep going!',
+          'Nice work on this section. Make sure to link it back to your research questions.',
+        ];
+        var rep=replies[Math.floor(Math.random()*replies.length)];
+        var now2=new Date();
+        var t2=now2.getDate()+' Jun, '+String(now2.getHours()).padStart(2,'0')+':'+String(now2.getMinutes()).padStart(2,'0');
+        S.chats[S.activeFile].push({from:'sup',text:rep,time:t2});
+        if(S.screen==='files'){render();setTimeout(scrollChat,50);}
+      },1500);
+    }
+    var btn=document.getElementById('btn-send-chat');
+    if(btn) btn.addEventListener('click',sendMsg);
+    var inp=document.getElementById('chat-inp');
+    if(inp){
+      inp.addEventListener('keydown',function(e){
+        if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}
+      });
+      inp.addEventListener('input',function(){
+        this.style.height='42px';
+        this.style.height=Math.min(this.scrollHeight,120)+'px';
+      });
+    }
+    setTimeout(scrollChat,50);
+  }
+}
+
+render();
+</script>
+
+
+</body></html>
