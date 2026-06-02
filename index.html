@@ -19,6 +19,34 @@
 .btn-final{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:var(--r);font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:not-allowed;border:1.5px solid var(--border-md);background:var(--surface2);color:var(--text3);transition:all 0.2s}
 .btn-final.ready{background:var(--green);border-color:var(--green);color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(14,159,110,0.35)}
 .btn-final.ready:hover{background:#0b8a5e;transform:translateY(-1px);box-shadow:0 6px 20px rgba(14,159,110,0.4)}
+/* calendar add buttons */
+.cal-btns{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.cal-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:var(--rsm);font-size:12px;font-weight:600;text-decoration:none;border:1px solid var(--border-md);transition:all 0.15s;cursor:pointer}
+.cal-btn:hover{box-shadow:0 2px 6px rgba(0,0,0,0.1);transform:translateY(-1px)}
+.cal-btn-google{background:#fff;color:#3c4043;border-color:#dadce0}
+.cal-btn-google:hover{background:#f8f9fa}
+.cal-btn-outlook{background:#0078d4;color:#fff;border-color:#0078d4}
+.cal-btn-outlook:hover{background:#106ebe}
+/* ── NOTIFICATIONS ── */
+.notif-panel{position:fixed;top:58px;right:20px;width:360px;background:var(--surface);border:1px solid var(--border-md);border-radius:var(--rlg);box-shadow:0 8px 32px rgba(0,0,0,0.14);z-index:500;animation:slideUp 0.18s ease;overflow:hidden}
+.notif-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px;border-bottom:1px solid var(--border)}
+.notif-header-title{font-size:14px;font-weight:600}
+.notif-mark-read{font-size:12px;color:var(--blue);cursor:pointer;border:none;background:none;font-family:'DM Sans',sans-serif;font-weight:500}
+.notif-mark-read:hover{text-decoration:underline}
+.notif-list{max-height:420px;overflow-y:auto}
+.notif-item{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s;position:relative}
+.notif-item:last-child{border-bottom:none}
+.notif-item:hover{background:var(--surface2)}
+.notif-item.unread{background:#FAFBFF}
+.notif-item.unread::before{content:'';position:absolute;left:6px;top:50%;transform:translateY(-50%);width:6px;height:6px;border-radius:50%;background:var(--blue)}
+.notif-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.notif-body{flex:1;min-width:0}
+.notif-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.notif-desc{font-size:12px;color:var(--text2);line-height:1.5}
+.notif-time{font-size:11px;color:var(--text3);margin-top:3px}
+.notif-empty{padding:28px;text-align:center;color:var(--text3);font-size:13px}
+.bell-wrap{position:relative;display:inline-flex}
+.bell-dot{position:absolute;top:-3px;right:-3px;width:9px;height:9px;background:var(--red);border-radius:50%;border:2px solid var(--surface);pointer-events:none}
 .final-hint{font-size:12px;color:var(--text3);margin-top:8px}
 </style>
 <style>
@@ -432,10 +460,11 @@ function renderTopbar(){
   var c=cfg[sc]||{title:sc,sub:''};
   var tb=document.getElementById('topbar-slot');
   var backHtml=c.back?'<button class="back-btn" id="btn-back">'+ic('back',15)+'</button>':'';
-  var rightHtml='<button class="btn btn-sm" style="gap:6px">'+ic('bell',14)+'</button>';
+  var bellBtn='<div class="bell-wrap"><button class="btn btn-sm" id="btn-bell" style="gap:6px">'+ic('bell',14)+'</button>'+(unreadCount()>0?'<span class="bell-dot"></span>':'')+'</div>';
+  var rightHtml=(sc==='login'||sc==='courses'||sc==='topic'||sc==='supervisor'||sc==='group')?'':bellBtn;
   if(sc==='dashboard'){
     rightHtml='<button class="btn btn-sm" data-nav="courses" style="gap:6px">'+ic('book',14)+' My courses</button>'
-      +'<button class="btn btn-sm" style="gap:6px;margin-left:6px">'+ic('bell',14)+'</button>';
+      +'<div class="bell-wrap" style="margin-left:6px"><button class="btn btn-sm" id="btn-bell" style="gap:6px">'+ic('bell',14)+'</button>'+(unreadCount()>0?'<span class="bell-dot"></span>':'')+'</div>';
   }
   tb.innerHTML='<div class="topbar-left">'+backHtml+'<div><span class="topbar-title">'+c.title+'</span>'+(c.sub?'<span class="topbar-sub">'+c.sub+'</span>':'')+'</div></div><div class="topbar-right">'+rightHtml+'</div>';
   if(c.back){
@@ -444,6 +473,8 @@ function renderTopbar(){
       goto(c.back);
     });
   }
+  var bellEl=document.getElementById('btn-bell');
+  if(bellEl) bellEl.addEventListener('click',function(e){e.stopPropagation();showNotifPanel();});
 }
 
 /* ═══════════════ SCREENS ═══════════════ */
@@ -665,12 +696,25 @@ function screenMeetings(){
     return '<div class="slot'+cls+'" '+((!s.taken&&S.bookedSlots.indexOf(i)===-1)?'data-bs="'+i+'"':'')+'>'+txt+'</div>';
   }).join('');
   var upcoming=S.bookedSlots.map(function(i){
+    var gcal=googleCalUrl(SLOTS[i],sup.name);
+    var ocal=outlookCalUrl(SLOTS[i],sup.name);
     return '<div class="meeting-row">'
       +'<div style="width:42px;height:42px;background:var(--blue-light);border-radius:var(--rsm);display:flex;align-items:center;justify-content:center;color:var(--blue);flex-shrink:0">'+ic('cal',20)+'</div>'
-      +'<div style="flex:1"><p style="font-size:14px;font-weight:600">Meeting with '+sup.name+'</p>'
+      +'<div style="flex:1">'
+      +'<p style="font-size:14px;font-weight:600">Meeting with '+sup.name+'</p>'
       +'<p style="font-size:13px;color:var(--text2);margin-top:2px">'+SLOTS[i].l+' · Online (Teams)</p>'
-      +'<p style="font-size:12px;color:var(--text3);margin-top:4px">Agenda: Review draft and discuss next steps.</p>'
-      +'</div><span class="badge b-blue">Confirmed</span></div>';
+      +'<p style="font-size:12px;color:var(--text3);margin-top:3px">Agenda: Review draft and discuss next steps.</p>'
+      +'<div class="cal-btns">'
+      +'<a href="'+gcal+'" target="_blank" class="cal-btn cal-btn-google">'
+      +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
+      +'Add to Google Calendar</a>'
+      +'<a href="'+ocal+'" target="_blank" class="cal-btn cal-btn-outlook">'
+      +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
+      +'Add to Outlook</a>'
+      +'</div>'
+      +'</div>'
+      +'<span class="badge b-blue">Confirmed</span>'
+      +'</div>';
   }).join('');
   return '<div class="fade meetings-grid">'
     +'<div>'
@@ -784,6 +828,124 @@ function screenFiles(){
     +'<div class="files-list-panel">'+listHtml+'</div>'
     +'<div class="files-chat-panel">'+chatPanel+'</div>'
     +'</div>';
+}
+
+/* ═══════════════ CALENDAR HELPERS ═══════════════ */
+function parseSlotDate(label){
+  // label format: "Mon 2 Jun · 14:00"
+  var months={Jan:0,Feb:1,Mar:2,Apr:3,May:4,Jun:5,Jul:6,Aug:7,Sep:8,Oct:9,Nov:10,Dec:11};
+  var parts=label.split(' · ');
+  var dateParts=parts[0].split(' '); // ["Mon","2","Jun"]
+  var timeParts=parts[1].split(':'); // ["14","00"]
+  var d=new Date(2026, months[dateParts[2]], parseInt(dateParts[1]),
+    parseInt(timeParts[0]), parseInt(timeParts[1]));
+  return d;
+}
+function toGCalDate(d){
+  return d.getFullYear()
+    +pad(d.getMonth()+1)+pad(d.getDate())
+    +'T'+pad(d.getHours())+pad(d.getMinutes())+'00';
+}
+function pad(n){return String(n).padStart(2,'0');}
+function googleCalUrl(slot, supName){
+  var start=parseSlotDate(slot.l);
+  var end=new Date(start.getTime()+45*60000);
+  var title=encodeURIComponent('Thesis meeting with '+supName);
+  var details=encodeURIComponent('Supervision meeting — TS2 Master thesis\nOnline via Teams');
+  return 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+    +'&text='+title
+    +'&dates='+toGCalDate(start)+'/'+toGCalDate(end)
+    +'&details='+details;
+}
+function outlookCalUrl(slot, supName){
+  var start=parseSlotDate(slot.l);
+  var end=new Date(start.getTime()+45*60000);
+  var title=encodeURIComponent('Thesis meeting with '+supName);
+  var body=encodeURIComponent('Supervision meeting — TS2 Master thesis. Online via Teams.');
+  return 'https://outlook.live.com/calendar/0/deeplink/compose?subject='+title
+    +'&startdt='+start.toISOString()
+    +'&enddt='+end.toISOString()
+    +'&body='+body
+    +'&path=%2Fcalendar%2Faction%2Fcompose';
+}
+
+/* ═══════════════ NOTIFICATIONS ═══════════════ */
+var NOTIFS = [
+  {id:0, type:'deadline', read:false, title:'Deadline reminder', desc:'Your thesis final submission deadline is in 74 days — 15 Aug 2026. Stay on track with your writing plan.', time:'Today, 09:00', color:'var(--red-light)', iconColor:'var(--red)'},
+  {id:1, type:'feedback', read:false, title:'Supervisor feedback received', desc:'Prof. Hansen has added comments to "ResearchQuestions_draft.docx". Open Files & feedback to review.', time:'Today, 08:30', color:'var(--green-light)', iconColor:'var(--green)'},
+  {id:2, type:'meeting', read:false, title:'Meeting confirmed', desc:'Your meeting with Prof. Hansen is confirmed for Mon 2 Jun · 14:00. Don\'t forget to add it to your calendar.', time:'Yesterday, 16:45', color:'var(--blue-light)', iconColor:'var(--blue)'},
+  {id:3, type:'note', read:true, title:'New supervisor note', desc:'Prof. Hansen left a note on Week 3 — Motivation section. Check Files & feedback for details.', time:'18 May, 09:14', color:'var(--purple-light)', iconColor:'var(--purple)'},
+  {id:4, type:'deadline', read:true, title:'Week 4 task reminder', desc:'You have 1 incomplete task in "Research questions". Complete it before your next meeting.', time:'17 May, 10:00', color:'var(--amber-light)', iconColor:'var(--amber)'},
+  {id:5, type:'feedback', read:true, title:'Draft uploaded successfully', desc:'"Draft_Introduction_v2.pdf" was uploaded and sent to your supervisor for review.', time:'28 Apr, 14:02', color:'var(--green-light)', iconColor:'var(--green)'},
+];
+
+var notifIcons = {
+  deadline:'<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  feedback:'<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+  meeting:'<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+  note:'<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>',
+};
+
+function unreadCount(){ return NOTIFS.filter(function(n){return !n.read;}).length; }
+
+function showNotifPanel(){
+  // remove if already open
+  var existing=document.getElementById('notif-panel');
+  if(existing){existing.remove();return;}
+  var unread=unreadCount();
+  var items=NOTIFS.map(function(n){
+    var iconPath=notifIcons[n.type]||notifIcons.note;
+    return '<div class="notif-item'+(n.read?'':' unread')+'" data-notif-id="'+n.id+'">'
+      +'<div class="notif-icon" style="background:'+n.color+';color:'+n.iconColor+'">'
+      +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+iconPath+'</svg>'
+      +'</div>'
+      +'<div class="notif-body">'
+      +'<p class="notif-title">'+n.title+'</p>'
+      +'<p class="notif-desc">'+n.desc+'</p>'
+      +'<p class="notif-time">'+n.time+'</p>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+  var panel=document.createElement('div');
+  panel.className='notif-panel';
+  panel.id='notif-panel';
+  panel.innerHTML='<div class="notif-header">'
+    +'<span class="notif-header-title">Notifications'+(unread>0?' <span style="background:var(--red);color:#fff;font-size:10px;padding:1px 6px;border-radius:999px;font-weight:600;margin-left:4px">'+unread+'</span>':'')+'</span>'
+    +'<button class="notif-mark-read" id="btn-mark-all">Mark all as read</button>'
+    +'</div>'
+    +'<div class="notif-list">'+(items||'<div class="notif-empty">No notifications</div>')+'</div>';
+  document.body.appendChild(panel);
+
+  // mark all read
+  document.getElementById('btn-mark-all').addEventListener('click',function(e){
+    e.stopPropagation();
+    NOTIFS.forEach(function(n){n.read=true;});
+    panel.remove();
+    renderTopbar(); // refresh bell dot
+    attachEvents(S.screen);
+  });
+
+  // mark individual read on click
+  panel.querySelectorAll('[data-notif-id]').forEach(function(el){
+    el.addEventListener('click',function(e){
+      e.stopPropagation();
+      var id=parseInt(this.getAttribute('data-notif-id'));
+      NOTIFS[id].read=true;
+      this.classList.remove('unread');
+      renderTopbar();
+      attachEvents(S.screen);
+    });
+  });
+
+  // close when clicking outside
+  setTimeout(function(){
+    document.addEventListener('click',function handler(e){
+      if(!panel.contains(e.target)){
+        panel.remove();
+        document.removeEventListener('click',handler);
+      }
+    });
+  },50);
 }
 
 /* ═══════════════ SCROLL CHAT ═══════════════ */
@@ -971,14 +1133,25 @@ function attachEvents(sc){
           document.getElementById('modal-confirm').addEventListener('click',function(){
             S.bookedSlots.push(i);
             modal.remove();
+            var gcal=googleCalUrl(SLOTS[i],sup.name);
+            var ocal=outlookCalUrl(SLOTS[i],sup.name);
             // success popup
             var success=document.createElement('div');
             success.className='modal-overlay';
             success.innerHTML='<div class="modal-box">'
               +'<div class="modal-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>'
               +'<p class="modal-title">Meeting booked!</p>'
-              +'<p class="modal-sub">Your meeting with <strong>'+sup.name+'</strong> is confirmed for<br><strong>'+SLOTS[i].l+'</strong>.<br>A confirmation has been sent to your email.</p>'
-              +'<div class="modal-actions"><button class="btn btn-primary btn-sm" id="modal-ok">Done</button></div>'
+              +'<p class="modal-sub">Your meeting with <strong>'+sup.name+'</strong> is confirmed for<br><strong>'+SLOTS[i].l+'</strong>.<br><span style="font-size:12px;color:var(--text3)">A confirmation has been sent to your email.</span></p>'
+              +'<p style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px;text-align:center">Add to your calendar</p>'
+              +'<div style="display:flex;gap:8px;justify-content:center;margin-bottom:16px">'
+              +'<a href="'+gcal+'" target="_blank" class="cal-btn cal-btn-google">'
+              +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
+              +'Google Calendar</a>'
+              +'<a href="'+ocal+'" target="_blank" class="cal-btn cal-btn-outlook">'
+              +'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
+              +'Outlook</a>'
+              +'</div>'
+              +'<div class="modal-actions"><button class="btn btn-sm" id="modal-ok">Done</button></div>'
               +'</div>';
             document.body.appendChild(success);
             document.getElementById('modal-ok').addEventListener('click',function(){
