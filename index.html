@@ -4,7 +4,23 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TS2 — Research Platform</title>
-<link href="./ts2-prototype_files/css2" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ── MODAL OVERLAY ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;z-index:1000;animation:fadeIn 0.15s ease}
+.modal-box{background:var(--surface);border-radius:var(--rlg);padding:28px 28px 24px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.18);animation:slideUp 0.2s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.modal-icon{width:52px;height:52px;border-radius:50%;background:var(--green-light);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;color:var(--green)}
+.modal-title{font-size:17px;font-weight:600;text-align:center;margin-bottom:6px}
+.modal-sub{font-size:14px;color:var(--text2);text-align:center;line-height:1.6;margin-bottom:20px}
+.modal-actions{display:flex;gap:8px;justify-content:center}
+/* ── FINAL SUBMISSION BUTTON ── */
+.final-submit-wrap{margin-top:24px;padding-top:20px;border-top:1px solid var(--border);text-align:center}
+.btn-final{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border-radius:var(--r);font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:not-allowed;border:1.5px solid var(--border-md);background:var(--surface2);color:var(--text3);transition:all 0.2s}
+.btn-final.ready{background:var(--green);border-color:var(--green);color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(14,159,110,0.35)}
+.btn-final.ready:hover{background:#0b8a5e;transform:translateY(-1px);box-shadow:0 6px 20px rgba(14,159,110,0.4)}
+.final-hint{font-size:12px;color:var(--text3);margin-top:8px}
+</style>
 <style>
 :root{
   --bg:#F4F3EF;
@@ -269,6 +285,7 @@ var S = {
   onboarded: false,
   activeFile: 0,
   chats: {},
+  _visitedCourses: false,
 };
 
 /* ═══════════════ DATA ═══════════════ */
@@ -416,6 +433,10 @@ function renderTopbar(){
   var tb=document.getElementById('topbar-slot');
   var backHtml=c.back?'<button class="back-btn" id="btn-back">'+ic('back',15)+'</button>':'';
   var rightHtml='<button class="btn btn-sm" style="gap:6px">'+ic('bell',14)+'</button>';
+  if(sc==='dashboard'){
+    rightHtml='<button class="btn btn-sm" data-nav="courses" style="gap:6px">'+ic('book',14)+' My courses</button>'
+      +'<button class="btn btn-sm" style="gap:6px;margin-left:6px">'+ic('bell',14)+'</button>';
+  }
   tb.innerHTML='<div class="topbar-left">'+backHtml+'<div><span class="topbar-title">'+c.title+'</span>'+(c.sub?'<span class="topbar-sub">'+c.sub+'</span>':'')+'</div></div><div class="topbar-right">'+rightHtml+'</div>';
   if(c.back){
     document.getElementById('btn-back').addEventListener('click',function(){
@@ -427,8 +448,10 @@ function renderTopbar(){
 
 /* ═══════════════ SCREENS ═══════════════ */
 function screenLogin(){
+  var showBack=S.onboarded||S._visitedCourses;
   return '<div style="display:flex;align-items:center;justify-content:center;min-height:100%">'
     +'<div style="width:420px" class="fade">'
+    +(showBack?'<button class="btn btn-sm" id="btn-login-back" style="margin-bottom:18px">'+ic('back',14)+' My courses</button>':'')
     +'<div style="text-align:center;margin-bottom:28px">'
     +'<div class="login-logo-big">'+ic('book',34)+'</div>'
     +'<h1 style="margin-bottom:6px">Welcome back</h1>'
@@ -544,6 +567,7 @@ function screenGroup(){
 function screenDashboard(){
   var p=pct();
   var sup=S.supervisor||SUPS[0];
+  var allDone=WEEKS.every(function(w){return w.status==='done';});
   var cards=WEEKS.map(function(w){
     var cls='wk-card'+(w.status==='done'?' done':w.status==='active'?' active-wk':' locked');
     var badge=w.status==='done'?'<span class="badge b-green" style="font-size:10px">'+ic('check',10)+' Done</span>'
@@ -576,6 +600,13 @@ function screenDashboard(){
     +'</div>'
     +'<p class="label">Writing plan — 12 weeks</p>'
     +'<div class="week-grid">'+cards+'</div>'
+    +'<div class="final-submit-wrap">'
+    +(allDone
+      ?'<button class="btn-final ready" id="btn-final-submit">'+ic('flag',18)+' Submit final thesis</button>'
+       +'<p class="final-hint">All sections complete — you are ready to submit!</p>'
+      :'<button class="btn-final" disabled>'+ic('lock',16)+' Final submission</button>'
+       +'<p class="final-hint">Complete all week sections to unlock final submission</p>')
+    +'</div>'
     +'</div>';
 }
 
@@ -792,10 +823,13 @@ function attachEvents(sc){
   });
 
   if(sc==='login'){
+    var blb=document.getElementById('btn-login-back');
+    if(blb) blb.addEventListener('click',function(){goto('courses');});
     document.getElementById('btn-login').addEventListener('click',function(){goto('courses');});
   }
   if(sc==='courses'){
-    document.getElementById('goto-ts2').addEventListener('click',function(){goto('topic');});
+    S._visitedCourses=true;
+    document.getElementById('goto-ts2').addEventListener('click',function(){goto(S.onboarded?'dashboard':'topic');});
   }
   if(sc==='topic'){
     document.querySelectorAll('.cat-item').forEach(function(el){
@@ -857,6 +891,37 @@ function attachEvents(sc){
         goto('weekdetail');
       });
     });
+    var bfs=document.getElementById('btn-final-submit');
+    if(bfs){
+      bfs.addEventListener('click',function(){
+        var modal=document.createElement('div');
+        modal.className='modal-overlay';
+        modal.innerHTML='<div class="modal-box">'
+          +'<div class="modal-icon" style="background:var(--blue-light);color:var(--blue)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>'
+          +'<p class="modal-title">Submit your thesis?</p>'
+          +'<p class="modal-sub">You are about to submit your final thesis.<br>Make sure all sections are reviewed and approved.<br><span style="color:var(--red);font-size:13px">This action cannot be undone.</span></p>'
+          +'<div class="modal-actions">'
+          +'<button class="btn btn-sm" id="modal-cancel-fs">Cancel</button>'
+          +'<button class="btn btn-primary btn-sm" id="modal-confirm-fs">'+ic('flag',14)+' Submit thesis</button>'
+          +'</div></div>';
+        document.body.appendChild(modal);
+        document.getElementById('modal-cancel-fs').addEventListener('click',function(){modal.remove();});
+        document.getElementById('modal-confirm-fs').addEventListener('click',function(){
+          modal.remove();
+          var done=document.createElement('div');
+          done.className='modal-overlay';
+          done.innerHTML='<div class="modal-box">'
+            +'<div class="modal-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>'
+            +'<p class="modal-title">Thesis submitted!</p>'
+            +'<p class="modal-sub">Congratulations! Your thesis has been submitted successfully.<br>You will receive a confirmation email shortly.</p>'
+            +'<div class="modal-actions"><button class="btn btn-primary btn-sm" id="modal-ok-fs">Done</button></div>'
+            +'</div>';
+          document.body.appendChild(done);
+          document.getElementById('modal-ok-fs').addEventListener('click',function(){done.remove();});
+        });
+        modal.addEventListener('click',function(e){if(e.target===modal) modal.remove();});
+      });
+    }
   }
   if(sc==='weekdetail'){
     document.querySelectorAll('[data-tc]').forEach(function(el){
@@ -886,9 +951,41 @@ function attachEvents(sc){
       el.addEventListener('click',function(){
         var i=parseInt(this.getAttribute('data-bs'));
         if(S.bookedSlots.indexOf(i)===-1){
-          S.bookedSlots.push(i);
-          toast('Meeting booked: '+SLOTS[i].l);
-          render();
+          // show confirmation modal
+          var sup=S.supervisor||SUPS[0];
+          var modal=document.createElement('div');
+          modal.className='modal-overlay';
+          modal.id='booking-modal';
+          modal.innerHTML='<div class="modal-box">'
+            +'<div class="modal-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>'
+            +'<p class="modal-title">Confirm booking</p>'
+            +'<p class="modal-sub">Book a meeting with <strong>'+sup.name+'</strong> on<br><strong>'+SLOTS[i].l+'</strong>?<br><span style="font-size:13px;color:var(--text3)">Online via Teams · ~45 min</span></p>'
+            +'<div class="modal-actions">'
+            +'<button class="btn btn-sm" id="modal-cancel">Cancel</button>'
+            +'<button class="btn btn-primary btn-sm" id="modal-confirm">'+ic('check',14)+' Confirm booking</button>'
+            +'</div></div>';
+          document.body.appendChild(modal);
+          document.getElementById('modal-cancel').addEventListener('click',function(){
+            modal.remove();
+          });
+          document.getElementById('modal-confirm').addEventListener('click',function(){
+            S.bookedSlots.push(i);
+            modal.remove();
+            // success popup
+            var success=document.createElement('div');
+            success.className='modal-overlay';
+            success.innerHTML='<div class="modal-box">'
+              +'<div class="modal-icon"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>'
+              +'<p class="modal-title">Meeting booked!</p>'
+              +'<p class="modal-sub">Your meeting with <strong>'+sup.name+'</strong> is confirmed for<br><strong>'+SLOTS[i].l+'</strong>.<br>A confirmation has been sent to your email.</p>'
+              +'<div class="modal-actions"><button class="btn btn-primary btn-sm" id="modal-ok">Done</button></div>'
+              +'</div>';
+            document.body.appendChild(success);
+            document.getElementById('modal-ok').addEventListener('click',function(){
+              success.remove(); render();
+            });
+          });
+          modal.addEventListener('click',function(e){if(e.target===modal) modal.remove();});
         }
       });
     });
